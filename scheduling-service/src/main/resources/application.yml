@@ -1,0 +1,53 @@
+# =============================================================
+# application.yml — Spring Boot Scheduling Service Config
+# =============================================================
+
+server:
+  port: 8080
+  servlet:
+    context-path: /   # All endpoints start at /routes, /duties (no prefix)
+
+spring:
+  application:
+    name: ncrtc-scheduling-service
+
+  # MySQL DataSource
+  # Values come from environment variables (set in docker-compose.yml)
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/ncrtc_scheduling?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${SPRING_DATASOURCE_USERNAME:ncrtc}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+    # Connection pooling (HikariCP — Spring Boot's default)
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      # update: creates tables if missing, updates columns if schema changed
+      # validate: only validates (use in production)
+      # create-drop: drops and recreates on restart (use only in testing)
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+    show-sql: true         # Log SQL queries (set to false in production)
+    open-in-view: false    # Disable OSIV (Open Session In View) — prevents N+1 issues
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+
+# Internal API Key Authentication
+# FastAPI sends this key when calling this service
+# Validated in SecurityConfig.java
+app:
+  internal-api-key: ${INTERNAL_API_KEY:dev-internal-key}
+
+# Logging
+logging:
+  level:
+    com.ncrtc: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG

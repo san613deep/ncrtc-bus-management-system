@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Inter font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ---------------------------------------------------------------
+   Leaflet map CSS — REQUIRED for the map to display correctly
+   Without this, the map tiles appear broken / misaligned
+--------------------------------------------------------------- */
+@import 'leaflet/dist/leaflet.css';
+
+/* ---------------------------------------------------------------
+   Custom scrollbar for webkit browsers
+--------------------------------------------------------------- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 3px;
+}
+
+/* ---------------------------------------------------------------
+   Severity badge styles (used in incident list)
+--------------------------------------------------------------- */
+@layer components {
+  .badge-p1 {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800;
+  }
+  .badge-p2 {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800;
+  }
+  .badge-p3 {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800;
+  }
+  
+  /* Status badges */
+  .status-open        { @apply bg-gray-100 text-gray-700; }
+  .status-acknowledged { @apply bg-blue-100 text-blue-700; }
+  .status-in_progress  { @apply bg-amber-100 text-amber-700; }
+  .status-resolved     { @apply bg-green-100 text-green-700; }
+  .status-closed       { @apply bg-slate-100 text-slate-600; }
+
+  /* Card component */
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6;
+  }
+  
+  /* Primary button */
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg 
+           transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  /* Secondary button */
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg
+           border border-gray-200 transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+  }
+  
+  /* Danger button */
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg
+           transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+  }
+
+  /* Form input */
+  .form-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
+           placeholder-gray-400;
+  }
+}

@@ -1,0 +1,209 @@
+# =============================================================
+# Docker Compose — NCRTC Bus Management System
+# Run: docker compose up --build
+# Everything starts in the right order automatically.
+# =============================================================
+
+services:
+
+  # -----------------------------------------------------------
+  # PostgreSQL + PostGIS
+  # Primary database used by FastAPI (AVLS, Auth, IMS, CMS)
+  # PostGIS extension enables geospatial queries for depots/routes
+  # -----------------------------------------------------------
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: ncrtc_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ncrtc_network
+
+  # -----------------------------------------------------------
+  # MySQL 8.0
+  # Used by Spring Boot Scheduling Service only
+  # Gives you dual-DB architecture for resume/interviews
+  # -----------------------------------------------------------
+  mysql:
+    image: mysql:8.0
+    container_name: ncrtc_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ncrtc_network
+
+  # -----------------------------------------------------------
+  # Redis 7
+  # Caches vehicle positions, JWT blacklist, rate limit counters
+  # Key pattern: vehicle:pos:{id}, jwt:blacklist:{jti}
+  # -----------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: ncrtc_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    command: redis-server --appendonly yes
+    networks:
+      - ncrtc_network
+
+  # -----------------------------------------------------------
+  # FastAPI Backend (Primary API — Port 8000)
+  # Handles: Auth, AVLS, IMS, CMS
+  # Proxies scheduling requests to Spring Boot
+  # Runs migrations + seed automatically on first boot
+  # -----------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ncrtc_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: ${JWT_ACCESS_TOKEN_EXPIRE_MINUTES}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+      SCHEDULING_SERVICE_URL: ${SCHEDULING_SERVICE_URL}
+      TICK_API_KEY: ${TICK_API_KEY}
+      ENVIRONMENT: ${ENVIRONMENT}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./backend:/app         # Hot reload in dev
+      - uploads_data:/app/uploads
+    command: >
+      sh -c "alembic upgrade head &&
+             python -m app.seed.run_seed &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    networks:
+      - ncrtc_network
+
+  # -----------------------------------------------------------
+  # Spring Boot Scheduling Service (Internal — Port 8080)
+  # Handles: Routes, Duties, Roster
+  # Only reachable from within Docker network (not exposed to users)
+  # FastAPI calls it via SCHEDULING_SERVICE_URL
+  # -----------------------------------------------------------
+  scheduling-service:
+    build:
+      context: ./scheduling-service
+      dockerfile: Dockerfile
+    container_name: ncrtc_scheduling
+    restart: unless-stopped
+    ports:
+      - "8080:8080"            # Exposed for dev/debugging, restrict in prod
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - ncrtc_network
+
+  # -----------------------------------------------------------
+  # Next.js Frontend (Port 3000)
+  # Serves both the desktop dashboard and the driver PWA (/driver)
+  # -----------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ncrtc_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app        # Hot reload in dev
+      - /app/node_modules      # Isolate container node_modules from Windows host
+      - /app/.next             # Isolate Next.js build cache
+    command: sh -c "npm install && npm run dev"
+    networks:
+      - ncrtc_network
+
+  # -----------------------------------------------------------
+  # GPS Tick Script
+  # Simulates live bus movement by inserting GPS pings every 5s
+  # This is what makes the live map feel alive during demos
+  # In production: this would be a real GPS ingest service
+  # -----------------------------------------------------------
+  tick-script:
+    build:
+      context: ./scripts/tick
+      dockerfile: Dockerfile
+    container_name: ncrtc_tick
+    restart: unless-stopped
+    environment:
+      API_URL: http://backend:8000
+      TICK_API_KEY: ${TICK_API_KEY}
+      TICK_INTERVAL_SECONDS: 5
+    depends_on:
+      - backend
+    networks:
+      - ncrtc_network
+
+# -----------------------------------------------------------
+# Persistent Volumes
+# Data survives container restarts
+# -----------------------------------------------------------
+volumes:
+  pgdata:
+  mysqldata:
+  redisdata:
+  uploads_data:
+
+# -----------------------------------------------------------
+# Internal Network
+# Services talk to each other by name (e.g., "postgres", "redis")
+# Only exposed ports are accessible from your machine
+# -----------------------------------------------------------
+networks:
+  ncrtc_network:
+    driver: bridge

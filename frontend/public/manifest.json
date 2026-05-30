@@ -1,0 +1,32 @@
+/**
+ * PWA Manifest — /public/manifest.json
+ * ======================================
+ * Makes the driver app installable as a PWA on Android/iOS.
+ * When a driver opens /driver on their phone and taps
+ * "Add to Home Screen", this manifest defines how the icon
+ * and splash screen look.
+ */
+{
+  "name": "NCRTC Driver App",
+  "short_name": "NCRTC Driver",
+  "description": "NCRTC Feeder Bus Driver Application",
+  "start_url": "/driver",
+  "display": "standalone",
+  "background_color": "#1e40af",
+  "theme_color": "#1e40af",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

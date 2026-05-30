@@ -1,0 +1,47 @@
+# =============================================================
+# Python Dependencies — NCRTC FastAPI Backend
+# =============================================================
+
+# --- Web Framework ---
+fastapi==0.111.0
+uvicorn[standard]==0.29.0      # ASGI server with WebSocket support
+
+# --- Database ---
+sqlalchemy==2.0.30             # ORM (Object-Relational Mapper)
+psycopg2-binary==2.9.9         # PostgreSQL driver
+alembic==1.13.1                # Database migrations
+
+# --- GeoSpatial ---
+geoalchemy2==0.15.1            # PostGIS geometry types in SQLAlchemy
+
+# --- Redis ---
+redis==5.0.4                   # Redis client for caching
+
+# --- Authentication & Security ---
+python-jose[cryptography]==3.3.0  # JWT tokens
+passlib[bcrypt]==1.7.4            # Password hashing (bcrypt)
+bcrypt==4.0.1                     # Compatibility fix for Python 3.12 + passlib
+python-multipart==0.0.9           # File uploads (incident photos)
+
+# --- HTTP Client (for proxying to Spring Boot) ---
+httpx==0.27.0                  # Async HTTP client
+
+# --- Data Validation ---
+pydantic==2.7.1                # Input/output schema validation (built into FastAPI)
+pydantic-settings==2.2.1       # Load settings from .env file
+email-validator==2.1.1         # Email validation in schemas
+
+# --- Seed Script ---
+faker==25.0.0                  # Generate realistic fake data for seeding
+
+# --- AWS (for photo uploads to S3) ---
+boto3==1.34.96                 # AWS SDK
+
+# --- Testing ---
+pytest==8.2.0
+pytest-asyncio==0.23.6
+httpx==0.27.0                  # Used as test client too
+
+# --- Utilities ---
+python-dotenv==1.0.1           # Load .env in local dev
+pillow==10.3.0                 # Image processing for photo uploads

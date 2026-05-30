@@ -1,0 +1,44 @@
+{
+  "name": "ncrtc-bms-frontend",
+  "version": "1.0.0",
+  "description": "NCRTC Bus Management System — Next.js Frontend",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "14.2.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.4.5",
+
+    "axios": "^1.7.2",
+    "swr": "^2.2.5",
+
+    "leaflet": "^1.9.4",
+    "react-leaflet": "^4.2.1",
+    "@types/leaflet": "^1.9.12",
+
+    "zustand": "^4.5.2",
+
+    "react-markdown": "^9.0.1",
+    "date-fns": "^3.6.0",
+    "clsx": "^2.1.1",
+
+    "lucide-react": "^0.383.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.3"
+  }
+}
