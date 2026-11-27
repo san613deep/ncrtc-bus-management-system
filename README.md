@@ -11,7 +11,7 @@ A production-style fleet management system for NCRTC's feeder bus network around
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/your-org/ncrtc-bms.git
+git clone https://github.com/san613deep/ncrtc-bus-management-system.git
 cd ncrtc-bms
 
 # 2. Set up environment variables
@@ -28,16 +28,11 @@ docker compose up --build
 # API Docs:   http://localhost:8000/docs
 ```
 
-## 🔑 Demo Credentials
+## 🔐 Local demo accounts
 
-| Username | Password | Role |
-|---|---|---|
-| `admin` | `password` | System Admin |
-| `manager1` | `password` | Depot Manager (Noida) |
-| `operator1` | `password` | Control Room Operator |
-| `driver1` | `password` | Bus Driver (Noida) |
+The seed script creates local demonstration users with a shared sample password so the role-based flows can be explored. These are deliberately insecure demo-only credentials.
 
-> ⚠️ **Demo only** — these credentials are for evaluation purposes. Never use in production.
+**Do not expose a deployment that uses the seeded password.** Before any shared or public deployment, change the seed behavior to read a unique password from a local secret/environment variable, rotate any already-seeded demo accounts, and keep credentials out of documentation and source control.
 
 ---
 
