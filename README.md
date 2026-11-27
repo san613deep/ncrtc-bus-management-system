@@ -11,12 +11,12 @@ A production-style fleet management system for NCRTC's feeder bus network around
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/your-org/ncrtc-bms.git
+git clone https://github.com/san613deep/ncrtc-bus-management-system.git
 cd ncrtc-bms
 
 # 2. Set up environment variables
 cp .env.example .env
-# Edit .env with your values (or use defaults for local dev)
+# Edit .env and replace every placeholder, especially DEMO_USER_PASSWORD, JWT_SECRET and API keys.
 
 # 3. Start everything
 docker compose up --build
@@ -28,16 +28,11 @@ docker compose up --build
 # API Docs:   http://localhost:8000/docs
 ```
 
-## 🔑 Demo Credentials
+## 🔐 Local demo accounts
 
-| Username | Password | Role |
-|---|---|---|
-| `admin` | `password` | System Admin |
-| `manager1` | `password` | Depot Manager (Noida) |
-| `operator1` | `password` | Control Room Operator |
-| `driver1` | `password` | Bus Driver (Noida) |
+The seed script creates local demonstration users using the value of `DEMO_USER_PASSWORD`, hashes it with bcrypt and refuses to seed if the variable is missing.
 
-> ⚠️ **Demo only** — these credentials are for evaluation purposes. Never use in production.
+**Do not expose a deployment that uses the seeded password.** Use a unique local value before the first seed. Existing seeded accounts are not automatically rotated if the database already contains users; rotate them explicitly if you have previously used the shared demo password.
 
 ---
 

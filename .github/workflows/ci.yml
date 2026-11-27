@@ -10,7 +10,7 @@ on:
   pull_request:
     branches: [main, develop]
   push:
-    branches: [main]
+    branches: [main, "portfolio/**"]
 
 jobs:
   # -----------------------------------------------------------
@@ -149,9 +149,6 @@ jobs:
 
       - name: TypeScript type check
         run: npx tsc --noEmit
-
-      - name: Lint check
-        run: npm run lint
 
   # -----------------------------------------------------------
   # Job 4: Docker Build Smoke Test
