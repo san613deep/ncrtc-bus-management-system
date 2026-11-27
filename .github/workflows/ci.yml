@@ -151,7 +151,7 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Lint check
-        run: npm run lint
+        run: npx eslint .
 
   # -----------------------------------------------------------
   # Job 4: Docker Build Smoke Test
