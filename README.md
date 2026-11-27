@@ -16,7 +16,7 @@ cd ncrtc-bms
 
 # 2. Set up environment variables
 cp .env.example .env
-# Edit .env with your values (or use defaults for local dev)
+# Edit .env and replace every placeholder, especially DEMO_USER_PASSWORD, JWT_SECRET and API keys.
 
 # 3. Start everything
 docker compose up --build
@@ -30,9 +30,9 @@ docker compose up --build
 
 ## 🔐 Local demo accounts
 
-The seed script creates local demonstration users with a shared sample password so the role-based flows can be explored. These are deliberately insecure demo-only credentials.
+The seed script creates local demonstration users using the value of `DEMO_USER_PASSWORD`, hashes it with bcrypt and refuses to seed if the variable is missing.
 
-**Do not expose a deployment that uses the seeded password.** Before any shared or public deployment, change the seed behavior to read a unique password from a local secret/environment variable, rotate any already-seeded demo accounts, and keep credentials out of documentation and source control.
+**Do not expose a deployment that uses the seeded password.** Use a unique local value before the first seed. Existing seeded accounts are not automatically rotated if the database already contains users; rotate them explicitly if you have previously used the shared demo password.
 
 ---
 
