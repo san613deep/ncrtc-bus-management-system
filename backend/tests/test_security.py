@@ -3,7 +3,13 @@
 These tests intentionally avoid PostgreSQL and Redis; they validate the
 cryptographic helpers independently of infrastructure services.
 """
+import sys
+from pathlib import Path
+
 import pytest
+
+# Make the backend package importable when pytest is invoked from tests/.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from jose import JWTError
 
 from app.core.security import (
