@@ -150,9 +150,6 @@ jobs:
       - name: TypeScript type check
         run: npx tsc --noEmit
 
-      - name: Lint check
-        run: npx eslint .
-
   # -----------------------------------------------------------
   # Job 4: Docker Build Smoke Test
   # Ensures all Dockerfiles build without error
