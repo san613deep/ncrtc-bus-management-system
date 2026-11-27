@@ -2,10 +2,12 @@
 seed/seed_users.py — Seed Demo Users
 =======================================
 Creates one user of each role for demo purposes.
-All passwords are "password" (bcrypt hashed).
+Passwords are supplied through DEMO_USER_PASSWORD and hashed with bcrypt.
 
-⚠️ DEMO ONLY — never use these credentials in production.
+⚠️ DEMO ONLY — use a unique local value and never reuse it in production.
 """
+
+import os
 
 from sqlalchemy.orm import Session
 from app.models.user import User, UserRole
@@ -26,7 +28,10 @@ def seed_users(db: Session):
     avh_id = depots.get("DEP-AVH")
     gzb_id = depots.get("DEP-GZB")
 
-    hashed_pw = hash_password("password")  # All demo users share this password
+    demo_password = os.getenv("DEMO_USER_PASSWORD")
+    if not demo_password:
+        raise RuntimeError("DEMO_USER_PASSWORD must be set before seeding demo users.")
+    hashed_pw = hash_password(demo_password)
 
     users = [
         # --- Admins (no depot) ---
